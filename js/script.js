@@ -5,7 +5,7 @@ let s = 0;
 let hb = document.getElementById("h");
 let mb = document.getElementById("m");
 let sb = document.getElementById("s");
-
+let btn = document.getElementById('play');
 clicked = false;
 let play = () => {
     var int;
@@ -39,6 +39,7 @@ let play = () => {
             hb.innerHTML = h;
     }
     if (!clicked) {
+        btn.innerHTML = 'stop';
         clicked = true;
         int = setInterval(run, 1000);
     }
