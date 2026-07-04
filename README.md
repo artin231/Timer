@@ -2,8 +2,6 @@
 
 A modern, accessible, and visually stunning productivity timer built with UI/UX Pro Max design principles.
 
-![Screenshot of Timer Pro interface showing timer display with preset buttons and status indicator](./assets/screenshot.png)
-
 ## Overview
 
 Timer Pro is a sophisticated productivity timer application that combines a clean, modern interface with powerful functionality. It's designed for developers and power users who need a reliable and visually appealing time management tool.
