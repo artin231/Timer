@@ -377,6 +377,9 @@
             white-space: nowrap;
             border: 0;
         }
+        .hidden {
+            display: none !important;
+        }
         @media (max-width: 480px) {
             .timer-container {
                 margin: var(--spacing-md);
@@ -423,11 +426,11 @@
         
         <section class="timer-display" aria-label="Timer display">
             <div class="time-unit" role="timer" aria-label="hours">
-                <div class="time-value" id="h" aria-live="polite">0</div>
+                <div class="time-value" id="h" aria-live="polite">00</div>
                 <div class="time-label">Hours</div>
             </div>
             <div class="time-unit" role="timer" aria-label="minutes">
-                <div class="time-value" id="m" aria-live="polite">5</div>
+                <div class="time-value" id="m" aria-live="polite">05</div>
                 <div class="time-label">Minutes</div>
             </div>
             <div class="time-unit" role="timer" aria-label="seconds">
@@ -437,14 +440,14 @@
         </section>
         
         <section class="controls" aria-label="Timer controls">
-            <button id="play" class="btn btn-primary" onclick="play()" aria-label="Start timer">
+            <button id="play" class="btn btn-primary" aria-label="Start timer">
                 <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M23 7l-7 5 7 5V7z"></path>
                     <rect x="2" y="7" width="4" height="10"></rect>
                 </svg>
                 <span>Start</span>
             </button>
-            <button id="reset" class="btn btn-secondary hidden" onclick="resetTimer()" aria-label="Reset timer">
+            <button id="reset" class="btn btn-secondary hidden" aria-label="Reset timer">
                 <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M23 3a10 10 0 01-10 10M13 13L9 9m0 0l4-4m-4 4h12"></path>
                 </svg>
@@ -460,12 +463,12 @@
         <section class="preset-controls" aria-label="Quick presets">
             <h2 class="preset-title">Quick Presets</h2>
             <div class="preset-buttons">
-                <button class="preset-btn" data-minutes="1" onclick="setPreset(1)">1min</button>
-                <button class="preset-btn" data-minutes="5" onclick="setPreset(5)" data-active="true">5min</button>
-                <button class="preset-btn" data-minutes="10" onclick="setPreset(10)">10min</button>
-                <button class="preset-btn" data-minutes="15" onclick="setPreset(15)">15min</button>
-                <button class="preset-btn" data-minutes="25" onclick="setPreset(25)">25min</button>
-                <button class="preset-btn" data-minutes="60" onclick="setPreset(60)">60min</button>
+                <button class="preset-btn" data-minutes="1">1min</button>
+                <button class="preset-btn active" data-minutes="5">5min</button>
+                <button class="preset-btn" data-minutes="10">10min</button>
+                <button class="preset-btn" data-minutes="15">15min</button>
+                <button class="preset-btn" data-minutes="25">25min</button>
+                <button class="preset-btn" data-minutes="60">60min</button>
             </div>
         </section>
         
@@ -493,60 +496,35 @@
             s: 30,
             isRunning: false,
             intervalId: null,
-            min: 1,
-            presets: [],
-            totalTimeMs: 300000,
-            errorSound: null
+            timerStart: null,
+            totalTimeMs: 330000,
+            initialHours: 0,
+            initialMinutes: 5,
+            initialSeconds: 30
         };
         
         // Create audio context for fallback sounds when files aren't available
         let audioContext = null;
-        let clickBuffer = null;
         
         // Initialize Web Audio API for system sounds
         function initAudioContext() {
             try {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                createSystemSounds();
             } catch (e) {
                 console.log('Web Audio API not available:', e);
             }
-        }
-        
-        // Create simple procedural sounds
-        function createSystemSounds() {
-            if (!audioContext) return;
-            
-            // Create a click sound
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
-            clickBuffer = {
-                start: () => {
-                    oscillator.start();
-                    oscillator.stop(audioContext.currentTime + 0.05);
-                }
-            };
         }
         
         // Play sound with fallback
         function playSound(type) {
             const audio = document.getElementById(type + 'Sound');
             if (audio) {
-                if (audio.readyState >= 2) {
-                    audio.currentTime = 0;
-                    audio.play().catch(e => {
-                        console.log(`Failed to play ${type} sound:`, e);
-                        // Try Web Audio API fallback
-                        playSystemSound(type);
-                    });
-                }
+                audio.currentTime = 0;
+                audio.play().catch(e => {
+                    console.log(`Failed to play ${type} sound:`, e);
+                    // Try Web Audio API fallback
+                    playSystemSound(type);
+                });
             } else {
                 playSystemSound(type);
             }
@@ -557,8 +535,22 @@
             if (!audioContext) {
                 initAudioContext();
             }
-            if (audioContext && clickBuffer) {
-                clickBuffer.start();
+            if (audioContext) {
+                try {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(type === 'start' ? 800 : 600, audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + 0.05);
+                } catch (e) {
+                    console.log('Could not play system sound:', e);
+                }
             }
         }
         
@@ -569,7 +561,7 @@
             const sb = document.getElementById("s");
             
             if (hb) {
-                const newValue = h >= 10 ? h : '0' + h;
+                const newValue = String(h).padStart(2, '0');
                 if (hb.innerHTML !== newValue) {
                     hb.innerHTML = newValue;
                     hb.style.transition = 'none';
@@ -583,7 +575,7 @@
             }
             
             if (mb) {
-                const newValue = m >= 10 ? m : '0' + m;
+                const newValue = String(m).padStart(2, '0');
                 if (mb.innerHTML !== newValue) {
                     mb.innerHTML = newValue;
                     mb.style.transition = 'none';
@@ -597,21 +589,15 @@
             }
             
             if (sb) {
-                const newValue = s >= 10 ? s : '0' + s;
+                const newValue = String(s).padStart(2, '0');
                 if (sb.innerHTML !== newValue) {
                     sb.innerHTML = newValue;
                     sb.style.transition = 'none';
                     sb.offsetHeight;
                     sb.style.transition = 'all 0.3s ease';
                     sb.style.transform = 'scale(1.2)';
-                    if (type === 'stop') {
-                        sb.style.animation = 'pulse 0.5s infinite';
-                    } else {
-                        sb.style.animation = 'none';
-                    }
                     setTimeout(() => {
                         sb.style.transform = 'scale(1)';
-                        sb.style.animation = 'none';
                     }, 300);
                 }
             }
@@ -619,7 +605,7 @@
         
         // Validate and update timer with error handling
         function updateTimer() {
-            const remainingTime = appState.totalTimeMs - Date.now() + appState.timerStart;
+            const remainingTime = appState.totalTimeMs - (Date.now() - appState.timerStart);
             
             if (remainingTime <= 0) {
                 clearInterval(appState.intervalId);
@@ -629,9 +615,11 @@
                 appState.m = 0;
                 appState.s = 0;
                 updateDisplay(appState.h, appState.m, appState.s);
-                playSound('complete');
-                updateStatus('Complete', false);
+                playSound('stop');
+                updateStatus('Complete! 🎉', false);
                 showError('Timer complete!');
+                document.getElementById("reset").classList.remove('hidden');
+                updatePlayButton(false);
                 return;
             }
             
@@ -640,6 +628,23 @@
             appState.s = Math.floor((remainingTime % 60000) / 1000);
             
             updateDisplay(appState.h, appState.m, appState.s);
+        }
+        
+        // Update play button state
+        function updatePlayButton(isRunning) {
+            const playBtn = document.getElementById("play");
+            const span = playBtn.querySelector('span');
+            const svg = playBtn.querySelector('svg');
+            
+            if (isRunning) {
+                playBtn.setAttribute('aria-label', 'Pause timer');
+                span.textContent = 'Pause';
+                svg.innerHTML = '<rect x="4" y="4" width="16" height="16" rx="2" fill="currentColor"></rect>';
+            } else {
+                playBtn.setAttribute('aria-label', 'Start timer');
+                span.textContent = 'Start';
+                svg.innerHTML = '<path d="M23 7l-7 5 7 5V7z"></path><rect x="2" y="7" width="4" height="10"></rect>';
+            }
         }
         
         // Play button with haptic feedback
@@ -662,12 +667,9 @@
                 appState.intervalId = setInterval(updateTimer, 1000);
                 appState.isRunning = true;
                 
-                document.getElementById("play").setAttribute('aria-label', 'Pause timer');
-                document.getElementById("play").querySelector('span').textContent = 'Pause';
-                document.getElementById("play").querySelector('svg').innerHTML = 
-                    '<path d="M11 9l-6 6m0-6l6 6"></path><rect x="4" y="4" width="16" height="16" rx="2"></rect>';
-                
+                updatePlayButton(true);
                 updateStatus('Running', true);
+                document.getElementById("reset").classList.add('hidden');
                 
             } else {
                 playSound('stop');
@@ -680,12 +682,9 @@
                 appState.intervalId = null;
                 appState.isRunning = false;
                 
-                document.getElementById("play").setAttribute('aria-label', 'Start timer');
-                document.getElementById("play").querySelector('span').textContent = 'Start';
-                document.getElementById("play").querySelector('svg').innerHTML = 
-                    '<path d="M23 7l-7 5 7 5V7z"></path><rect x="2" y="7" width="4" height="10"></rect>';
-                
+                updatePlayButton(false);
                 updateStatus('Paused', false);
+                document.getElementById("reset").classList.remove('hidden');
             }
         }
         
@@ -700,53 +699,67 @@
             clearInterval(appState.intervalId);
             appState.intervalId = null;
             appState.isRunning = false;
-            appState.h = 0;
-            appState.m = 5;
-            appState.s = 30;
-            appState.totalTimeMs = 330000;
+            appState.h = appState.initialHours;
+            appState.m = appState.initialMinutes;
+            appState.s = appState.initialSeconds;
+            appState.totalTimeMs = (appState.initialHours * 3600 + appState.initialMinutes * 60 + appState.initialSeconds) * 1000;
             
             updateDisplay(appState.h, appState.m, appState.s);
-            
-            const btn = document.getElementById("play");
-            btn.setAttribute('aria-label', 'Start timer');
-            btn.querySelector('span').textContent = 'Start';
-            btn.querySelector('svg').innerHTML = 
-                '<path d="M23 7l-7 5 7 5V7z"></path><rect x="2" y="7" width="4" height="10"></rect>';
-            
+            updatePlayButton(false);
             document.getElementById("reset").classList.add('hidden');
-            
-            updateStatus('Reset', false);
+            updateStatus('Ready', false);
             hideError();
+            
+            // Highlight the active preset
+            const presetBtns = document.querySelectorAll('.preset-btn');
+            presetBtns.forEach(btn => {
+                const minutes = parseInt(btn.getAttribute('data-minutes'));
+                btn.classList.toggle('active', minutes === appState.initialMinutes);
+            });
         }
         
         // Set preset time
-        function setPreset(minutes) {
+        function setPreset(minutes, event) {
             if (appState.isRunning) {
                 return; // Don't allow changing while running
             }
             
-            resetTimer();
+            // Reset timer first
+            clearInterval(appState.intervalId);
+            appState.intervalId = null;
+            appState.isRunning = false;
             
+            // Set new time
+            appState.initialHours = 0;
+            appState.initialMinutes = minutes;
+            appState.initialSeconds = 0;
+            appState.h = 0;
             appState.m = minutes;
             appState.s = 0;
-            appState.totalTimeMs = (appState.h * 3600 + appState.m * 60 + appState.s) * 1000;
+            appState.totalTimeMs = minutes * 60 * 1000;
             
-            const minutesBtns = document.querySelectorAll('.preset-btn');
-            minutesBtns.forEach(btn => {
+            // Update preset buttons
+            const presetBtns = document.querySelectorAll('.preset-btn');
+            presetBtns.forEach(btn => {
                 const btnMinutes = parseInt(btn.getAttribute('data-minutes'));
                 btn.classList.toggle('active', btnMinutes === minutes);
             });
             
             updateDisplay(appState.h, appState.m, appState.s);
+            updatePlayButton(false);
+            document.getElementById("reset").classList.add('hidden');
             updateStatus(`Preset: ${minutes} minutes`, false);
+            hideError();
             
-            // Highlight visual feedback
-            const btn = event.target.closest('.preset-btn');
-            if (btn) {
-                btn.style.transform = 'scale(1.1)';
-                setTimeout(() => {
-                    btn.style.transform = 'scale(1)';
-                }, 200);
+            // Visual feedback
+            if (event && event.target) {
+                const btn = event.target.closest('.preset-btn');
+                if (btn) {
+                    btn.style.transform = 'scale(1.1)';
+                    setTimeout(() => {
+                        btn.style.transform = 'scale(1)';
+                    }, 200);
+                }
             }
         }
         
@@ -802,11 +815,14 @@
                 play();
             }
             
-            // Number keys for presets
-            if (e.key >= 1 && e.key <= 6) {
+            // Number keys for presets (1-6)
+            if (e.key >= '1' && e.key <= '6' && !e.target.closest('input')) {
                 e.preventDefault();
                 const presets = [1, 5, 10, 15, 25, 60];
-                setPreset(presets[e.key - 1]);
+                const index = parseInt(e.key) - 1;
+                if (index < presets.length) {
+                    setPreset(presets[index], null);
+                }
             }
         });
         
@@ -818,14 +834,18 @@
                     clearInterval(appState.intervalId);
                     appState.isRunning = false;
                     updateStatus('Paused (tab hidden)', false);
+                    updatePlayButton(false);
                 }
             } else {
                 // Resume timer when tab is visible
-                if (!appState.isRunning) {
-                    appState.timerStart = Date.now() - appState.totalTimeMs;
-                    appState.intervalId = setInterval(updateTimer, 1000);
-                    appState.isRunning = true;
-                    updateStatus('Running (tab visible)', true);
+                if (!appState.isRunning && appState.intervalId === null && appState.timerStart !== null) {
+                    const remainingTime = appState.totalTimeMs - (Date.now() - appState.timerStart);
+                    if (remainingTime > 0) {
+                        appState.intervalId = setInterval(updateTimer, 1000);
+                        appState.isRunning = true;
+                        updateStatus('Running', true);
+                        updatePlayButton(true);
+                    }
                 }
             }
         });
@@ -834,6 +854,27 @@
         function init() {
             initAudioContext();
             updateDisplay(appState.h, appState.m, appState.s);
+            
+            // Set initial active preset (5min)
+            const presetBtns = document.querySelectorAll('.preset-btn');
+            presetBtns.forEach(btn => {
+                const minutes = parseInt(btn.getAttribute('data-minutes'));
+                btn.classList.toggle('active', minutes === 5);
+            });
+            
+            // Add event listeners to preset buttons
+            presetBtns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    const minutes = parseInt(this.getAttribute('data-minutes'));
+                    setPreset(minutes, e);
+                });
+            });
+            
+            // Add event listener to play button
+            document.getElementById('play').addEventListener('click', play);
+            
+            // Add event listener to reset button
+            document.getElementById('reset').addEventListener('click', resetTimer);
             
             // Add reduced motion support
             const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -844,7 +885,7 @@
             }
             
             // Add touch feedback for mobile
-            const buttons = document.querySelectorAll('.btn');
+            const buttons = document.querySelectorAll('.btn, .preset-btn');
             buttons.forEach(btn => {
                 btn.addEventListener('touchstart', () => {
                     btn.style.transform = 'scale(0.95)';
@@ -864,63 +905,12 @@
                     console.log('Audio file failed to load, will use system sounds');
                 });
             });
+            
+            console.log('Timer Pro initialized successfully!');
         }
         
         // Start the application
         init();
-        
-        // Custom cursor effect for better UX
-        document.addEventListener('mousemove', (e) => {
-            if (e.target.closest('.btn') || e.target.closest('.time-unit') || e.target.closest('.preset-btn')) {
-                document.body.style.cursor = 'pointer';
-            } else {
-                document.body.style.cursor = 'default';
-            }
-        });
-        
-        // Add particle effect for celebration
-        function celebrate() {
-            const container = document.querySelector('.timer-container');
-            const colors = ['#dc2626', '#ef4444', '#f97316', '#fbbf24'];
-            
-            for (let i = 0; i < 20; i++) {
-                setTimeout(() => {
-                    const particle = document.createElement('div');
-                    particle.style.position = 'absolute';
-                    particle.style.width = '4px';
-                    particle.style.height = '4px';
-                    particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                    particle.style.borderRadius = '50%';
-                    particle.style.pointerEvents = 'none';
-                    particle.style.left = Math.random() * 500 + 'px';
-                    particle.style.top = '250px';
-                    container.appendChild(particle);
-                    
-                    let y = 250;
-                    let x = parseFloat(particle.style.left);
-                    const angle = (Math.PI / 4) * (Math.random() - 0.5);
-                    const velocityX = Math.cos(angle) * 3;
-                    const velocityY = Math.sin(angle) * 3 - 2;
-                    
-                    const animate = () => {
-                        y -= velocityY;
-                        x += velocityX;
-                        particle.style.left = x + 'px';
-                        particle.style.top = y + 'px';
-                        
-                        if (y > 600 || x < -50 || x > 550) {
-                            particle.remove();
-                            return;
-                        }
-                        
-                        particle.style.opacity = y / 300;
-                        requestAnimationFrame(animate);
-                    };
-                    
-                    animate();
-                }, i * 30);
-            }
-        }
     </script>
 </body>
 </html>
