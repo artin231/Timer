@@ -3,18 +3,46 @@
      src: url(font/FiraCode-Medium.ttf);
  }
 
+ :root{
+    --background-color: rgb(13, 13, 40);
+    --timer_bg : rgb(26, 26, 66);
+    --timer_border: rgb(47, 47, 81);
+ }
+
  * {
-     margin: 0 auto;
+     margin: 0 ;
      font-family: 'FiraCode';
      font-size: 20px;
      text-align: center;
  }
 
  body {
-     background-color: #2c2c2c;
+     background-color: var(--background-color);
+     height: 100vh;
  }
+ 
+ .container{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
- .timer>div {
+.container .timer{
+    width: 400px;
+    height: 500px;
+    background-color: var(--timer_bg);
+    border-radius: 30px;
+    border: 2px solid var(--timer_border);
+    transition: all 400ms ease;
+}
+
+.container .timer:hover{
+    box-shadow: 0px 0px 30px var(--timer_bg);
+}
+
+ .timer>div.num {
      margin-top: 120px;
      color: white;
      background-color: #181818;

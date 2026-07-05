@@ -11,33 +11,41 @@
 </head>
 
 <body>
+    <section class="container">
 
-    <section class="timer">
+        <div class="timer">
 
-        <div>
-            <div id="h">0</div>
-            <div>hours</div>
+            <div class="num">
+                <div id="h">0</div>
+                <div>hours</div>
+            </div>
+
+            <div class="num">
+                <div id="m">5</div>
+                <div>minutes</div>
+            </div>
+
+            <div class="num">
+                <div id="s">0</div>
+                <div>second</div>
+            </div>
+
+        <div class="btns">
+            <div class="top">
+          <button onclick="play()" id="play"> start </button>
+            <button class="hidden" id="reset">reset</button>
+            </div>
+           <div class="bottom">
+              <button onclick="play()" id="play"> start </button>
+            <button class="hidden" id="reset">reset</button>
+           </div> 
+  
         </div>
 
-        <div>
-            <div id="m">5</div>
-            <div>minutes</div>
         </div>
-
-        <div>
-            <div id="s">0</div>
-            <div>second</div>
-        </div>
-
-
 
     </section>
-            <br>
-        <br>
-        <div class="btns">
-            <button onclick="play()" id="play"> start </button>
-            <button class="hidden" id="reset">reset</button>
-        </div>
+
     <script src="js/script.js"></script>
 
 </body>
