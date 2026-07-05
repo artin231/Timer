@@ -3,78 +3,138 @@
      src: url(font/FiraCode-Medium.ttf);
  }
 
- :root{
-    --background-color: rgb(13, 13, 40);
-    --timer_bg : rgb(26, 26, 66);
-    --timer_border: rgb(47, 47, 81);
+ :root {
+     --background-color: rgb(13, 13, 40);
+     --timer_bg: rgb(26, 26, 66);
+     --timer_border: rgb(47, 47, 81);
  }
 
  * {
-     margin: 0 ;
+     margin: 0;
      font-family: 'FiraCode';
      font-size: 20px;
      text-align: center;
+          transition: all 400ms ease;
+
  }
 
  body {
      background-color: var(--background-color);
      height: 100vh;
+
  }
- 
- .container{
-    height: 100%;
-    width: 100%;
+
+ .container {
+     height: 100%;
+     width: 100%;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+ }
+
+ .container .timer {
+     width: 500px;
+     height: 500px;
+     background-color: var(--timer_bg);
+     border-radius: 30px;
+     border: 2px solid var(--timer_border);
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+     justify-content: space-around;
+     padding-bottom: 2%;
+ }
+
+
+ .container .timer:hover {
+     box-shadow: 0px 0px 30px var(--timer_bg);
+ }
+
+ .container .timer .top {
+     padding-top: 15%;
+     height: 50%;
+     display: flex;
+     width: 100%;
+     align-items: center;
+     justify-content: flex-start;
+     flex-direction: column;
+     gap: 40%;
+
+ }
+
+ .container .timer .top .down button:hover {
+     transform: translateY(-5%);
+ }
+   .container .timer .top .down{
     display: flex;
-    align-items: center;
-    justify-content: center;
-}
+    gap: 10%;
+   }
+ .container .timer .top .down button#play {
+     width: 100px;
+     height: 50px;
+     border-radius: 15px;
+     border: 0;
+     background-color: rgb(10, 123, 31);
+     color: white;
+     box-shadow: 0px 0px 10px rgb(10, 123, 31);
+     cursor: pointer;
+ }
 
-.container .timer{
-    width: 400px;
-    height: 500px;
-    background-color: var(--timer_bg);
-    border-radius: 30px;
-    border: 2px solid var(--timer_border);
-    transition: all 400ms ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-around;
-}
+  .container .timer .top .down button#stop{
+         width: 100px;
+     height: 50px;
+     border-radius: 15px;
+     border: 0;
+     background-color: rgb(123, 10, 31);
+     color: white;
+     box-shadow: 0px 0px 10px rgb(123, 10, 31);
+     cursor: pointer;
+  }
 
-.container .timer:hover{
-    box-shadow: 0px 0px 30px var(--timer_bg);
-}
+   .container .timer .top .down button#reset{
+             width: 100px;
+     height: 50px;
+     border-radius: 15px;
+     border: 0;
+     background-color: rgb(180, 163, 13);
+     color: white;
+     box-shadow: 0px 0px 10px rgb(184, 167, 10);
+     cursor: pointer;
+   }
 
-.container .timer .top{
-    height: 50%;
-    display: flex;
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-}
 
-.container .timer .bottom{
-    height: 50%;
-    display: flex;
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;   
-}
+ .container .timer .bottom {
+     height: 50%;
+     display: flex;
+     width: 100%;
+     align-items: center;
+     justify-content: center;
+     flex-direction: column;
+     gap: 10%;
+ }
 
-.container .timer .top h1{
-    font-size: 50px;
-    color: white;
-}
+ .container .timer .top h1 {
+     font-size: 50px;
+     color: white;
+ }
 
-.container .timer .bottom .up{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 30px;
-    flex-wrap: wrap;
-}
- .hidden{
-    display: none;
+ .container .timer .bottom .up {
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     gap: 30px;
+     flex-wrap: wrap;
+     height: 50%;
+ }
+
+ .container .timer .bottom .down {
+     display: flex;
+     gap: 1%;
+     align-items: center;
+     justify-content: center;
+     height: 50%;
+ }
+
+ .hidden {
+     display: none;
  }
