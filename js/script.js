@@ -6,13 +6,20 @@ let time = document.getElementById('time')
 let btn = document.getElementById('play');
 let hid_btn = document.querySelector('#reset');
 clicked = false;
-st = {'click':false,remain:Number(time.innerHTML),int:null};
+let rem = time.innerHTML.split(':')
+console.log(Number(rem[1]));
+
+console.log(rem);
+
+st = {'click':false,remain:rem,int:null};
 let min = 1;
 let play = () => {
+    rem = time.innerHTML.split(':')
+
     var int;
-    h = Number(hb.innerHTML);
-    m = Number(mb.innerHTML);
-    s = Number(sb.innerHTML);
+    h = rem[0];
+    m = rem[1];
+    s = rem[2];
     min = 1;
     let run = () => {
 
@@ -35,10 +42,7 @@ let play = () => {
                     }
                 }
             }
-
-            sb.innerHTML = s;
-            mb.innerHTML = m;
-            hb.innerHTML = h;
+            time.innerHTML = `${h}:${m}:${s}`
     }
     if (!st.clicked) {
         hid_btn.classList.remove('hidden')
@@ -65,9 +69,7 @@ let play = () => {
         st.clicked = false;
         min = null;
         btn.innerHTML = 'start';
-           sb.innerHTML = '0';
-            mb.innerHTML = '5';
-            hb.innerHTML = '0';
+        time.innerHTML = '0:05:0'
     })
 
 
