@@ -5,13 +5,16 @@ let s = 0;
 let time = document.getElementById('time')
 let btn = document.getElementById('play');
 let hid_btn = document.querySelector('#reset');
+let ch_btn = document.querySelectorAll('.down_btn');
+console.log(ch_btn);
+
 clicked = false;
 let rem = time.innerHTML.split(':')
 console.log(Number(rem[1]));
 
 console.log(rem);
 
-st = {'click':false,remain:rem,int:null};
+st = { 'click': false, remain: rem, int: null };
 let min = 1;
 let play = () => {
     rem = time.innerHTML.split(':')
@@ -23,37 +26,37 @@ let play = () => {
     min = 1;
     let run = () => {
 
-            if (s > 0) {
-                s-=min;
+        if (s > 0) {
+            s -= min;
+        }
+        else {
+            if (m > 0) {
+                m -= min;
+                s = 59;
             }
             else {
-                if (m > 0) {
-                    m-=min;
+                if (h > 0) {
+                    h -= min;
+                    m = 59;
                     s = 59;
                 }
                 else {
-                    if (h > 0) {
-                        h-=min;
-                        m = 59;
-                        s = 59;
-                    }
-                    else {
-                        return;
-                    }
+                    return;
                 }
             }
-            time.innerHTML = `${h}:${m}:${s}`
+        }
+        time.innerHTML = `${h}:${m}:${s}`
     }
     if (!st.clicked) {
         hid_btn.classList.remove('hidden')
         console.log(hid_btn);
-        
+
         btn.innerHTML = 'stop';
         st.clicked = true;
         st.int = setInterval(run, 1000);
     }
-    
-    else{
+
+    else {
         hid_btn.classList.add('hidden');
         clearInterval(st.int);
         st.int = null;
@@ -62,7 +65,7 @@ let play = () => {
         btn.innerHTML = 'start'
 
     }
-    hid_btn.addEventListener('click',() => {
+    hid_btn.addEventListener('click', () => {
         hid_btn.classList.add('hidden');
         clearInterval(st.int);
         st.int = null;
@@ -73,5 +76,24 @@ let play = () => {
     })
 
 
+
+
 }
+ch_btn.forEach(ch => {
+    ch.addEventListener('click', () => {
+        console.log(1)
+        hid_btn.classList.add('hidden');
+        clearInterval(st.int);
+        st.int = null;
+        st.clicked = false;
+        min = null;
+        btn.innerHTML = 'start';
+        console.log((ch.innerHTML.substring(0,1)));
+        
+        rem[1] = Number(ch.id);
+        time.innerHTML = `${rem[0]}:${rem[1]}:${rem[2]}`
+
+    })
+})
+
 
